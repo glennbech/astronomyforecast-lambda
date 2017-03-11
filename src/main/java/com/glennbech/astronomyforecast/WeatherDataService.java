@@ -22,7 +22,7 @@ public class WeatherDataService {
 
     public static final int CLEAR_TRESHOLD = 4;
 
-    public List<Time> findDarkHoursWithClearSky(float lat, float lon) throws Exception {
+    public List<Time> findDarkHoursWithClearSky(double lat, double lon) throws Exception {
         WeatherData data = getWeatherData(lat, lon);
         List<Time> forecasts = data.getProduct().getTimeList().stream()
                 .filter(time -> time.getFrom().after(new Date()))
@@ -33,19 +33,19 @@ public class WeatherDataService {
         return forecasts;
     }
 
-    private WeatherData getWeatherData(float lat, float lon) throws Exception {
+    private WeatherData getWeatherData(double lat, double lon) throws Exception {
         Serializer serializer = new Persister();
         URL url;
         try {
             url = new URL("http://api.met.no/weatherapi/locationforecastlts/1.3/?lat=" + lat + ";lon=" + lon);
-            JAXBContext jaxbContext = JAXBContext.newInstance(WeatherData.class) ;
+            JAXBContext jaxbContext = JAXBContext.newInstance(WeatherData.class);
             return (WeatherData) jaxbContext.createUnmarshaller().unmarshal(url.openStream());
         } catch (MalformedURLException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public static boolean isInDarkness(Date date, float lat, float lon) {
+    public static boolean isInDarkness(Date date, double lat, double lon) {
 
         final Calendar theDate = Calendar.getInstance();
         theDate.setTime(date);
@@ -74,14 +74,17 @@ public class WeatherDataService {
         return date;
     }
 
-    private static SunriseSunsetCalculator makeCalculator(float lat, float lon) {
+    private static SunriseSunsetCalculator makeCalculator(double lat, double lon) {
         Location l = new Location(lat, lon);
         return new SunriseSunsetCalculator(l, TimeZone.getDefault());
     }
 
-
     public static void main(String[] args) throws Exception {
         WeatherDataService wds = new WeatherDataService();
-        System.out.println(wds.getWeatherData(10f,50f));
+        System.out.println(wds.getWeatherData(10f, 50f));
+    }
+
+    public List<Time> findDarkHoursWithClearSky(double lat, double lon, int timeZone) throws Exception {
+        return findDarkHoursWithClearSky(lat, lon);
     }
 }

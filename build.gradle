@@ -50,7 +50,7 @@ task updateLambdaCode(type: AWSLambdaUpdateFunctionCodeTask, dependsOn: shadowJa
     functionName 'astronomyforecast'
     def file = new S3File()
     file.bucketName = 'glennbech-lambda-deployments'
-    file.key= 'astroforecast-lambda-1.0-SNAPSHOT-all.jar'
+    file.key = 'astroforecast-lambda-1.0-SNAPSHOT-all.jar'
     s3File = file
 }
 
@@ -63,4 +63,10 @@ dependencies {
     compile group: 'org.simpleframework', name: 'simple-xml', version: '2.7.1'
     compile group: 'com.luckycatlabs', name: 'SunriseSunsetCalculator', version: '1.2'
     compile group: 'com.ocpsoft', name: 'ocpsoft-pretty-time', version: '1.0.7'
+    compile group: 'com.google.code.gson', name: 'gson', version: '1.7.2'
+    compile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+    compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.2.0'
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.+"
+
 }

@@ -2,31 +2,41 @@ package com.glennbech.astronomyforecast;
 
 public class AstronomyForecastRequest {
 
-    private double lat, lon;
+    private long timeStamp;
+    private float lat, lon;
     private int timeZone;
 
-    public AstronomyForecastRequest(double lat, double lon, int timeZoneOffset) {
+    public AstronomyForecastRequest(float lat, float lon, int timeZoneOffset) {
         this.lat = lat;
         this.lon = lon;
         this.timeZone = timeZoneOffset;
+        this.timeStamp = System.currentTimeMillis();
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
     public AstronomyForecastRequest() {
     }
 
-    public double getLat() {
+    public float getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
+    public void setLat(float lat) {
         this.lat = lat;
     }
 
-    public double getLon() {
+    public float getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
+    public void setLon(float lon) {
         this.lon = lon;
     }
 
@@ -36,5 +46,14 @@ public class AstronomyForecastRequest {
 
     public void setTimeZone(int timeZone) {
         this.timeZone = timeZone;
+    }
+
+    @Override
+    public String toString() {
+        return "AstronomyForecastRequest{" +
+                "lat=" + lat +
+                ", lon=" + lon +
+                ", timeZone=" + timeZone +
+                '}';
     }
 }

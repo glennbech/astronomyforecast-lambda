@@ -1,1 +1,15 @@
 # Created by .ignore support plugin (hsz.mobi)
+.gradle/2.14.1/
+build/classes/main/com/glennbech/astronomyforecast/LambdaResponse.class
+build/classes/test/
+build/dependency-cache/
+build/resources/
+build/tmp/compileJava/
+build/tmp/publishMavenJavaPublicationToMavenRepository/
+out/
+src/main/resources/
+.idea/
+.gradle/
+
+
+

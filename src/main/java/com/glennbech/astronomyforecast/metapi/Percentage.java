@@ -2,11 +2,7 @@ package com.glennbech.astronomyforecast.metapi;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-/**
- * Created by glennbech on 08.09.2016.
- */
 public class Percentage {
-
 
     private float percentage;
 
