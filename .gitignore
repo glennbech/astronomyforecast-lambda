@@ -10,6 +10,4 @@ out/
 src/main/resources/
 .idea/
 .gradle/
-
-
-
+build/
