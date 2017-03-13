@@ -24,8 +24,8 @@
     "stage": "prod"
   },
   "queryStringParameters": {
-    "lat": 50.0,
-    "lon":10.0,
+    "lat": 21.1212,
+    "lon": 157.2323,
     "timeZone": 1
   },
   "headers": {

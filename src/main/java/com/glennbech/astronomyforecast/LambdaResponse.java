@@ -1,17 +1,19 @@
 package com.glennbech.astronomyforecast;
 
+import com.google.gson.Gson;
+
 import java.util.Map;
 
-public class LambdaResponse {
+public class LambdaResponse<T> {
 
-    private String statusCode ;
-    private Map<String, String > headers;
-    private String body ;
+    private String statusCode;
+    private Map<String, String> headers;
+    private String body;
 
-    public LambdaResponse(String statusCode, Map<String, String> headers, String body) {
+    public LambdaResponse(String statusCode, Map<String, String> headers, T content) {
         this.statusCode = statusCode;
+        this.body = new Gson().toJson(content);
         this.headers = headers;
-        this.body = body;
     }
 
     public String getStatusCode() {

@@ -12,28 +12,30 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 public class AstronomyForecastHandler {
 
+    private static final java.lang.String CORS_HEADER = "Access-Control-Allow-Origin";
+
     public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 
         final ReadContext ctx = JsonPath.parse(inputStream);
-        Map<String, String> params = ctx.read("$.queryStringParameters");
-
+        final Map<String, String> params = ctx.read("$.queryStringParameters");
         context.getLogger().log("params " + params);
+
         final Double latParam = Double.valueOf(params.get("lat"));
         final Double lonPram = Double.valueOf(params.get("lon"));
-        final int timeZone = Integer.valueOf(params.get("timeZone"));
-
+        final String timeZone = params.get("timeZone");
         context.getLogger().log("lat is " + latParam + ", lon is " + lonPram + ", tz " + timeZone);
 
-        final AstronomyForecastResponse resp = new AstronomyForecastResponse();
+        final AstronomyForecastResponse response = new AstronomyForecastResponse();
         final WeatherDataService service = new WeatherDataService();
         final List<Time> darkTimes;
 
         try {
-            darkTimes = service.findDarkHoursWithClearSky(latParam, lonPram, timeZone);
+            darkTimes = service.findDarkHoursWithClearSky(latParam, lonPram, TimeZone.getTimeZone(timeZone));
         } catch (Exception e) {
             context.getLogger().log(e.getMessage());
             return;
@@ -42,12 +44,21 @@ public class AstronomyForecastHandler {
                 .stream()
                 .map(HourlyForecast::fromTime)
                 .collect(Collectors.toList());
-        resp.setHorlyForecasts(hourlyForecasts);
-        String s = new Gson().toJson(resp);
-        LambdaResponse lambdaResponse = new LambdaResponse("200", new HashMap<>(), s);
-        s = new Gson().toJson(lambdaResponse);
-        outputStream.write(s.getBytes());
+        response.setHorlyForecasts(hourlyForecasts);
+
+        final HashMap<String, String> headerMap = createHTTPHeaders();
+
+        final LambdaResponse<AstronomyForecastResponse> lambdaResponse
+                = new LambdaResponse<>("200", headerMap, response);
+        String resultString = new Gson().toJson(lambdaResponse);
+        outputStream.write(resultString.getBytes());
         outputStream.flush();
         outputStream.close();
+    }
+
+    private HashMap<String, String> createHTTPHeaders() {
+        final HashMap<String, String> headerMap = new HashMap<>();
+        headerMap.put(CORS_HEADER, "*");
+        return headerMap;
     }
 }

@@ -5,12 +5,13 @@ import com.glennbech.astronomyforecast.metapi.Time;
 import com.glennbech.astronomyforecast.metapi.WeatherData;
 import com.luckycatlabs.sunrisesunset.SunriseSunsetCalculator;
 import com.luckycatlabs.sunrisesunset.dto.Location;
-import org.simpleframework.xml.Serializer;
-import org.simpleframework.xml.core.Persister;
 
 import javax.xml.bind.JAXBContext;
-import java.net.MalformedURLException;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -22,30 +23,28 @@ public class WeatherDataService {
 
     public static final int CLEAR_TRESHOLD = 4;
 
-    public List<Time> findDarkHoursWithClearSky(double lat, double lon) throws Exception {
+    public List<Time> findDarkHoursWithClearSky(double lat, double lon, TimeZone timeZone) {
         WeatherData data = getWeatherData(lat, lon);
-        List<Time> forecasts = data.getProduct().getTimeList().stream()
+        return data.getProduct().getTimeList().stream()
                 .filter(time -> time.getFrom().after(new Date()))
                 .filter(time -> time.getLocation().getCloudiness() != null)
-                .filter(time -> isInDarkness(time.getTo(), lat, lon))
+                .filter(time -> isInDarkness(time.getTo(), lat, lon, timeZone))
                 .filter(time -> time.getLocation().getCloudiness().getPercentage() < CLEAR_TRESHOLD)
                 .collect(Collectors.toList());
-        return forecasts;
     }
 
-    private WeatherData getWeatherData(double lat, double lon) throws Exception {
-        Serializer serializer = new Persister();
+    private WeatherData getWeatherData(double lat, double lon) {
         URL url;
         try {
             url = new URL("http://api.met.no/weatherapi/locationforecastlts/1.3/?lat=" + lat + ";lon=" + lon);
             JAXBContext jaxbContext = JAXBContext.newInstance(WeatherData.class);
             return (WeatherData) jaxbContext.createUnmarshaller().unmarshal(url.openStream());
-        } catch (MalformedURLException e) {
+        } catch (IOException | JAXBException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    public static boolean isInDarkness(Date date, double lat, double lon) {
+    public static boolean isInDarkness(Date date, double lat, double lon, TimeZone timeZone) {
 
         final Calendar theDate = Calendar.getInstance();
         theDate.setTime(date);
@@ -55,11 +54,12 @@ public class WeatherDataService {
         tomorrow.roll(Calendar.DAY_OF_MONTH, 1);
         Date midnightTomorrow = midnighOf(tomorrow).getTime();
 
-        SunriseSunsetCalculator calc = makeCalculator(lat, lon);
+        SunriseSunsetCalculator calc = makeCalculator(lat, lon, timeZone);
         Calendar astronomicalSunRise = calc.getAstronomicalSunriseCalendarForDate(theDate);
         Calendar astronomicalSunSet = calc.getAstronomicalSunsetCalendarForDate(theDate);
-        return (astronomicalSunRise != null && date.after(midnight) && date.before(astronomicalSunRise.getTime())) ||
-                (astronomicalSunSet != null && date.after(astronomicalSunSet.getTime()) && date.before(midnightTomorrow));
+
+        return (date.after(midnight) && date.before(astronomicalSunRise.getTime())) ||
+                (date.after(astronomicalSunSet.getTime()) && date.before(midnightTomorrow));
     }
 
     private static Calendar midnighOf(Calendar ofWhatDay) {
@@ -74,17 +74,16 @@ public class WeatherDataService {
         return date;
     }
 
-    private static SunriseSunsetCalculator makeCalculator(double lat, double lon) {
+    private static SunriseSunsetCalculator makeCalculator(double lat, double lon, TimeZone timeZone) {
         Location l = new Location(lat, lon);
-        return new SunriseSunsetCalculator(l, TimeZone.getDefault());
+        return new SunriseSunsetCalculator(l, timeZone);
     }
 
-    public static void main(String[] args) throws Exception {
-        WeatherDataService wds = new WeatherDataService();
-        System.out.println(wds.getWeatherData(10f, 50f));
-    }
 
-    public List<Time> findDarkHoursWithClearSky(double lat, double lon, int timeZone) throws Exception {
-        return findDarkHoursWithClearSky(lat, lon);
+    public static void main(String[] args) throws ParseException {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:MM:ss");
+        System.out.println(isInDarkness(formatter.parse("2017-01-01 06:00:00"), 78, 15, TimeZone.getTimeZone("CET")));
+
     }
 }
