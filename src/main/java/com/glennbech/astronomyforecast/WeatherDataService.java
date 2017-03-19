@@ -29,7 +29,6 @@ public class WeatherDataService {
                 .filter(time -> time.getFrom().after(new Date()))
                 .filter(time -> time.getLocation().getCloudiness() != null)
                 .filter(time -> isInDarkness(time.getTo(), lat, lon, timeZone))
-                .filter(time -> time.getLocation().getCloudiness().getPercentage() < CLEAR_TRESHOLD)
                 .collect(Collectors.toList());
     }
 

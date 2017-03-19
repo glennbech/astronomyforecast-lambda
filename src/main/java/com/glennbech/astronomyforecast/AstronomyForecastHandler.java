@@ -44,10 +44,9 @@ public class AstronomyForecastHandler {
                 .stream()
                 .map(HourlyForecast::fromTime)
                 .collect(Collectors.toList());
+
         response.setHorlyForecasts(hourlyForecasts);
-
         final HashMap<String, String> headerMap = createHTTPHeaders();
-
         final LambdaResponse<AstronomyForecastResponse> lambdaResponse
                 = new LambdaResponse<>("200", headerMap, response);
         String resultString = new Gson().toJson(lambdaResponse);
